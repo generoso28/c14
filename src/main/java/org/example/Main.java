@@ -9,6 +9,7 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
+
         File caminho_arquivo = new File("src/main/java/assets/acampamento.pdf"); // Caminho para o arquivo PDF
         try (PDDocument document = Loader.loadPDF(caminho_arquivo)) {
 
