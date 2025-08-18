@@ -20,7 +20,6 @@ public class Main {
             PDFTextStripper stripper = new PDFTextStripper();
 
             String text = stripper.getText(document);
-
             System.out.println("--- INÍCIO DO TEXTO DO PDF ---");
             System.out.println(text);
             System.out.println("--- FIM DO TEXTO DO PDF ---");
