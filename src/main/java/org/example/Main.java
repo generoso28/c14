@@ -9,8 +9,8 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
-        File file = new File("src/main/java/assets/acampamento.pdf");
-        try (PDDocument document = Loader.loadPDF(file)) {
+        File file_arquivo = new File("src/main/java/assets/acampamento.pdf");
+        try (PDDocument document = Loader.loadPDF(file_arquivo)) {
 
             if (document.isEncrypted()) {
                 System.err.println("Erro: O documento está criptografado e não pode ser lido.");
