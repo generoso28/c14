@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
-        File file = new File("src/main/java/assets/acampamento.pdf");
+        File file = new File("src/main/java/assets/acampamento.pdf"); // Caminho para o arquivo PDF
         try (PDDocument document = Loader.loadPDF(file)) {
 
             if (document.isEncrypted()) {
