@@ -70,4 +70,4 @@ jobs:
       - uses: actions/checkout@v4
       - name: Send notification by email
         run: |
-          sh scripts/send_email.sh
+          sh scripts/sendEmail.sh
