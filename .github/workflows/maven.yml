@@ -36,3 +36,38 @@ jobs:
       with:
           name: jar file
           path: target/*.jar
+
+  test:
+
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 24
+        uses: actions/setup-java@v4
+        with:
+          java-version: '24'
+          distribution: 'temurin'
+          cache: maven
+      - name: Run JUnit tests
+        run: |
+          mvn clean test site
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test report
+          path: target/site
+
+  notification:
+
+    needs: test
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Send notification by email
+        run: |
+          sh scripts/send_email.sh
