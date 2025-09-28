@@ -1,81 +1,78 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Java CI with Maven
+name: CI Pipeline para Leitor de PDF em Java
 
 on:
-  workflow_dispatch:
   push:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  workflow_dispatch:
 
 jobs:
-  build:
-
+  # Job 1: Executa os testes unitários e gera o relatório
+  run_tests:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 24
-      uses: actions/setup-java@v4
-      with:
-        java-version: '24'
-        distribution: 'temurin'
-        cache: maven
-    - name: Build with Maven
-      run: |
-        mvn clean install -DskipTests
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-          name: jar file
-          path: target/*.jar
+      - name: Checkout do código
+        uses: actions/checkout@v4
 
-  test:
-
-    needs: build
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK 24
+      - name: Configurar JDK 24 e Cache do Maven
         uses: actions/setup-java@v4
         with:
           java-version: '24'
           distribution: 'temurin'
           cache: maven
-      - name: Run JUnit tests
-        run: |
-          mvn clean test site
-      - name: Upload build artifacts
+
+      - name: Executar testes e gerar relatório
+        run: mvn -B test site
+
+      - name: Armazenar relatório de testes
         uses: actions/upload-artifact@v4
         with:
-          name: test report
+          name: relatorio-testes
           path: target/site
 
-  notification:
-    needs: test
+  # Job 2: Compila e empacota a aplicação (executa em paralelo com run_tests)
+  package_application:
     runs-on: ubuntu-latest
-    if: success() # Executa apenas se o trabalho anterior for bem-sucedido
     steps:
-      - name: Send notification on success
-        uses: dawidd6/action-send-mail@v3
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 24 e Cache do Maven
+        uses: actions/setup-java@v4
         with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
-          subject: 'Build e Testes Concluídos com Sucesso: ${{ github.repository }}'
-          to: seu-email@dominio.com
-          from: GitHub Actions <github-actions@example.com>
-          body: |
-            O workflow para o repositório ${{ github.repository }} foi concluído com sucesso.
-            Commit: ${{ github.sha }}
-            Pode ver os artefactos de build e os relatórios de teste no resumo da execução da Action.
+          java-version: '24'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Empacotar a aplicação (Build)
+        run: mvn -B package -DskipTests
+
+      - name: Armazenar pacote JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: pacote-jar
+          path: target/*.jar
+
+  # Job 3: Envia notificação após a conclusão dos jobs anteriores
+  send_notification:
+    # Garante que este job só execute após os outros dois terminarem
+    needs: [run_tests, package_application]
+    # "if: always()" garante que a notificação seja enviada mesmo se um dos jobs falhar
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Enviar e-mail com o status do pipeline
+        # Define a variável de ambiente para o script
+        env:
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+        run: |
+          # Passa o status dos jobs como argumento para o script
+          if [[ "${{ needs.run_tests.result }}" == "success" && "${{ needs.package_application.result }}" == "success" ]]; then
+            sh scripts/sendEmail.sh success ${{ github.repository }} ${{ github.sha }}
+          else
+            sh scripts/sendEmail.sh failure ${{ github.repository }} ${{ github.sha }}
+          fi
