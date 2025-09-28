@@ -71,7 +71,7 @@ jobs:
           EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
         run: |
           # Passa o status dos jobs como argumento para o script
-          if [[ "${{ needs.run_tests.result }}" == "success" && "${{ needs.package_application.result }}" == "success" ]]; then
+          if [[ "${{ needs.run_tests.result }}" = "success" && "${{ needs.package_application.result }}" = "success" ]]; then
             sh scripts/sendEmail.sh success ${{ github.repository }} ${{ github.sha }}
           else
             sh scripts/sendEmail.sh failure ${{ github.repository }} ${{ github.sha }}
