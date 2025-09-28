@@ -65,14 +65,21 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Enviar e-mail com o status do pipeline
-        # Define a variável de ambiente para o script
-        env:
-          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
-        run: |
-          # Passa o status dos jobs como argumento para o script
-          if [[ "${{ needs.run_tests.result }}" = "success" && "${{ needs.package_application.result }}" = "success" ]]; then
-            sh scripts/sendEmail.sh success ${{ github.repository }} ${{ github.sha }}
-          else
-            sh scripts/sendEmail.sh failure ${{ github.repository }} ${{ github.sha }}
-          fi
+      - name: Enviar notificação por e-mail
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USER }}
+          password: ${{ secrets.SMTP_PASS }}
+          subject: >-
+            ${{ needs.run_tests.result == 'success' && needs.package_application.result == 'success' && '✅ Sucesso:
+              Pipeline concluído' || '❌ Falha: Pipeline com erro' }}
+          to: ${{ secrets.EMAIL_RECIPIENT }}
+          from: "CI Pipeline <no-reply@github.com>"
+          body: |
+            Repositório: ${{ github.repository }}
+            Commit: ${{ github.sha }}
+            Status dos testes: ${{ needs.run_tests.result }}
+            Status do build: ${{ needs.package_application.result }}
+            Veja os logs em: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
