@@ -61,13 +61,21 @@ jobs:
           path: target/site
 
   notification:
-
     needs: test
-
     runs-on: ubuntu-latest
-
+    if: success() # Executa apenas se o trabalho anterior for bem-sucedido
     steps:
-      - uses: actions/checkout@v4
-      - name: Send notification by email
-        run: |
-          sh scripts/sendEmail.sh
+      - name: Send notification on success
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: 'Build e Testes Concluídos com Sucesso: ${{ github.repository }}'
+          to: seu-email@dominio.com
+          from: GitHub Actions <github-actions@example.com>
+          body: |
+            O workflow para o repositório ${{ github.repository }} foi concluído com sucesso.
+            Commit: ${{ github.sha }}
+            Pode ver os artefactos de build e os relatórios de teste no resumo da execução da Action.
