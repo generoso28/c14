@@ -16,7 +16,7 @@ REPO_NAME=$2
 COMMIT_SHA=$3
 
 # Define o assunto e o corpo do e-mail com base no status
-if [ "$PIPELINE_STATUS" == "success" ]; then
+if [ "$PIPELINE_STATUS" = "success" ]; then
   SUBJECT="✅ Sucesso: Pipeline para o repositório $REPO_NAME concluído"
   BODY="O pipeline foi executado com sucesso para o commit $COMMIT_SHA."
 else
