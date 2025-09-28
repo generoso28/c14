@@ -2,7 +2,7 @@ package org.reader;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 
-public class printFileService {
+public class PrintFileService {
     public static void printFile(PDDocument document) {
         if(document == null) {
             System.err.println("Documento nulo fornecido para impressão.");
@@ -15,7 +15,7 @@ public class printFileService {
         else{
             System.out.println(
                     "--- INÍCIO DO TEXTO DO PDF ---\n"
-                            + fileStripperService.stripTextFromPDF(document) +
+                            + FileStripperService.stripTextFromPDF(document) +
                             "\n--- FIM DO TEXTO DO PDF ---");
         }
 

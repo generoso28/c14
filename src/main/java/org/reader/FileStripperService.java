@@ -5,7 +5,7 @@ import org.apache.pdfbox.text.PDFTextStripper;
 
 import java.io.IOException;
 
-public class fileStripperService {
+public class FileStripperService {
     public static String stripTextFromPDF(PDDocument document) {
         try {
             if(document == null) {
